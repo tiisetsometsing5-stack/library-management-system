@@ -1,16 +1,69 @@
-# React + Vite
+# Community Library Management System
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+## Project Description
 
-Currently, two official plugins are available:
+The Community Library Management System is a web-based application developed using React. It helps manage library books, book availability, transactions, and registered users.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Features
 
-## React Compiler
+* **Login System:** Allows students and librarians/admins to log in using their credentials.
+* **Dashboard:** Displays library statistics and available books.
+* **Book Management:** Allows librarians/admins to add, update, and delete books.
+* **Availability Management:** Tracks book quantities and highlights books with low stock.
+* **Book Transactions:** Records borrowed books, returned books, and additional stock.
+* **User Management:** Allows librarians/admins to register, update, and delete users.
+* **Local Storage:** Saves books, users, and transaction records in the browser.
+* **Role-Based Access:** Provides different access to students and librarians/admins.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Technologies Used
 
-## Expanding the ESLint configuration
+* React
+* JavaScript
+* HTML
+* CSS
+* React Router
+* Vite
+* Browser Local Storage
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+## Installation and Setup
+
+1. Download or clone this repository.
+
+2. Open the project folder in Visual Studio Code.
+
+3. Open the terminal in the project folder.
+
+4. Install the required dependencies:
+
+   bash
+   npm install
+
+
+5. Start the development server:
+
+   bash
+   npm run dev
+   
+
+6. Open the local URL displayed in the terminal in your web browser.
+
+## Login Credentials
+
+**Librarian/Admin**
+
+* Username: `libraryAdmin`
+* Password: `Lib@2026`
+
+**Student**
+
+* Username: `libraryStudent`
+* Password: `Stu@2026`
+
+## Project Purpose
+
+This project was developed as an academic assignment to demonstrate the use of React components, hooks, controlled forms, routing, local storage, and basic user access control.
+
+## Author
+
+Tiisetso Metsing
+
