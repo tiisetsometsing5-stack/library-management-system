@@ -46,7 +46,6 @@ The application uses React for the frontend, Node.js and Express.js for the back
 
 ```text
 Community-Library-Management-System/
-│
 ├── frontend/
 │   ├── public/
 │   ├── src/
@@ -59,13 +58,11 @@ Community-Library-Management-System/
 │   │   └── main.jsx
 │   ├── package.json
 │   └── vite.config.js
-│
 ├── backend/
 │   ├── server.js
 │   ├── db.js
 │   ├── .env.example
 │   └── package.json
-│
 ├── .gitignore
 └── README.md
 ```
@@ -73,9 +70,6 @@ Community-Library-Management-System/
 ## 5. Installation and Setup
 
 ### Prerequisites
-
-Before running the application, ensure that the following are installed:
-
 - Node.js and npm
 - MySQL Server
 - Visual Studio Code
@@ -105,7 +99,7 @@ npm install
 ```
 
 3. Create a `.env` file inside the backend folder.
-4. Add your own MySQL connection details:
+4. Add your MySQL connection details:
 
 ```env
 DB_HOST=localhost
@@ -163,8 +157,6 @@ The system supports two user roles:
 Passwords are hashed before being stored in the database using bcryptjs.
 
 ## 7. API Endpoints
-
-The backend provides REST API endpoints for managing the application data.
 
 | Method | Endpoint | Description |
 |---|---|---|
