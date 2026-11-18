@@ -1,5 +1,9 @@
 import Card from "../../Components/Card";
 function Dashboard({ books, users, transactions }) {
+
+  const lowStockBooks = books.filter(
+  (book) => book.quantity < 2
+);
   return (
     <>
       <section>
@@ -19,6 +23,13 @@ function Dashboard({ books, users, transactions }) {
   <Card
     title="Total Transactions"
     value={transactions.length}
+  />
+</section>
+
+<section className="statistics">
+  <Card
+    title="Low Stock Books"
+    value={lowStockBooks.length}
   />
 </section>
 

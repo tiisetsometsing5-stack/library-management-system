@@ -10,7 +10,7 @@ function Books({ books, setBooks, loggedInUser })  {
   const [editingId, setEditingId] = useState(null);
   const [error, setError] = useState("");
 
-  function handleSubmit(event) {
+  async function handleSubmit(event) {
     event.preventDefault();
 
     if (
@@ -29,35 +29,74 @@ function Books({ books, setBooks, loggedInUser })  {
       return;
     }
 
+    const bookData = {
+  title: title,
+  author: author,
+  genre: genre,
+  isbn: isbn,
+  quantity: Number(quantity),
+};
+
     if (editingId !== null) {
-      setBooks(
-        books.map((book) =>
-          book.id === editingId
-            ? {
-                ...book,
-                title: title,
-                author: author,
-                genre: genre,
-                isbn: isbn,
-                quantity: Number(quantity),
-              }
-            : book
-        )
-      );
+  try {
+    const response = await fetch(
+      `http://localhost:5000/api/books/${editingId}`,
+      {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(bookData),
+      }
+    );
 
-      setEditingId(null);
-    } else {
-      const newBook = {
-        id: Date.now(),
-        title: title,
-        author: author,
-        genre: genre,
-        isbn: isbn,
-        quantity: Number(quantity),
-      };
-
-      setBooks([...books, newBook]);
+    if (!response.ok) {
+      throw new Error("Failed to update book");
     }
+
+    setBooks(
+      books.map((book) =>
+        book.id === editingId
+          ? { ...book, ...bookData }
+          : book
+      )
+    );
+
+    setEditingId(null);
+    clearForm();
+
+  } catch (error) {
+    setError(error.message);
+  }
+
+  return;
+}
+
+try {
+  const response = await fetch("http://localhost:5000/api/books", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(bookData),
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to add book");
+  }
+
+  const result = await response.json();
+
+  setBooks([...books, {
+    id: result.bookId,
+    ...bookData,
+  }]);
+
+  clearForm();
+
+} catch (error) {
+  setError(error.message);
+}
 
     clearForm();
   }
@@ -81,14 +120,30 @@ function Books({ books, setBooks, loggedInUser })  {
     setError("");
   }
 
-  function handleDelete(id) {
+  async function handleDelete(id) {
+  try {
+    const response = await fetch(
+      `http://localhost:5000/api/books/${id}`,
+      {
+        method: "DELETE",
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error("Failed to delete book");
+    }
+
     setBooks(books.filter((book) => book.id !== id));
+
+  } catch (error) {
+    setError(error.message);
   }
+}
 
   return (
     <>
       <h2>Book Management</h2>
-    {loggedInUser.role === "librarian" && (
+    {loggedInUser.role === "Librarian/Admin" && (
       <section>
         <h3>
           {editingId !== null ? "Update Book" : "Add New Book"}

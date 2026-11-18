@@ -16,49 +16,66 @@ import UserManagement from "./assets/Pages/UserManagement";
 import Layout from "./Components/Layout";
 
 function App() {
-  const [books, setBooks] = useState(() => {
-  const savedBooks = localStorage.getItem("books");
+  
+  const [books, setBooks] = useState([]);
 
-  return savedBooks ? JSON.parse(savedBooks) : [];
-});
+useEffect(() => {
+  fetch("http://localhost:5000/api/books")
+    .then((response) => response.json())
+    .then((data) => {
+      setBooks(data);
+    })
+    .catch((error) => {
+      console.error("Error fetching books:", error);
+    });
+}, []);
 
-  useEffect(() => {
-  localStorage.setItem("books", JSON.stringify(books));
-}, [books]);
+  
+const [users, setUsers] = useState([]);
 
-  const [users, setUsers] = useState(() => {
-  const savedUsers = localStorage.getItem("users");
+useEffect(() => {
+  fetch("http://localhost:5000/api/users")
+    .then((response) => response.json())
+    .then((data) => {
+      const formattedUsers = data.map((user) => ({
+        id: user.id,
+        name: user.name,
+        membershipId: user.membership_id,
+        role: user.role,
+      }));
 
-  return savedUsers ? JSON.parse(savedUsers) : [];
-});
+      setUsers(formattedUsers);
+    })
+    .catch((error) => {
+      console.error("Error fetching users:", error);
+    });
+}, []);
 
-  useEffect(() => {
-  localStorage.setItem("users", JSON.stringify(users));
-}, [users]);
 
-  const [transactions, setTransactions] = useState(() => {
-  const savedTransactions = localStorage.getItem("transactions");
+  const [transactions, setTransactions] = useState([]);
 
-  return savedTransactions
-    ? JSON.parse(savedTransactions)
-    : [];
-});
+useEffect(() => {
+  fetch("http://localhost:5000/api/transactions")
+    .then((response) => response.json())
+    .then((data) => {
+      const formattedTransactions = data.map((transaction) => ({
+        ...transaction,
+        user: transaction.userName,
+        date: new Date(transaction.date).toLocaleString(),
+      }));
 
-  useEffect(() => {
-  localStorage.setItem(
-    "transactions",
-    JSON.stringify(transactions)
-  );
-}, [transactions]);
+      setTransactions(formattedTransactions);
+    })
+    .catch((error) => {
+      console.error("Error fetching transactions:", error);
+    });
+}, []);
 
   const [loggedInUser, setLoggedInUser] = useState(null);
 
-  function handleLogin(username, role) {
-    setLoggedInUser({
-      username: username,
-      role: role,
-    });
-  }
+  function handleLogin(user) {
+  setLoggedInUser(user);
+}
 
   function handleLogout() {
     setLoggedInUser(null);
@@ -117,7 +134,7 @@ function App() {
           <Route
   path="/users"
   element={
-    loggedInUser.role === "librarian" ? (
+    loggedInUser.role === "Librarian/Admin" ? (
       <UserManagement
         users={users}
         setUsers={setUsers}

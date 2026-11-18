@@ -6,34 +6,40 @@ function Login({ onLogin }) {
   const [role, setRole] = useState("");
   const [error, setError] = useState("");
 
-  function handleLogin(event) {
-    event.preventDefault();
+  
+async function handleLogin(event) {
+  event.preventDefault();
 
-    if (username === "" || password === "" || role === "") {
-      setError("Please fill in all fields.");
-      return;
-    }
-
-    if (
-      role === "student" &&
-      username === "Student" &&
-      password === "Stu@2026"
-    ) {
-      onLogin(username, role);
-      return;
-    }
-
-    if (
-      role === "librarian" &&
-      username === "libraryAdmin" &&
-      password === "Lib@2026"
-    ) {
-      onLogin(username, role);
-      return;
-    }
-
-    setError("Invalid username, password, or role.");
+  if (username === "" || password === "") {
+    setError("Please enter your membership ID and password.");
+    return;
   }
+
+  try {
+    const response = await fetch("http://localhost:5000/api/login", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        membership_id: username,
+        password: password,
+      }),
+    });
+
+    const result = await response.json();
+
+    if (!response.ok) {
+      throw new Error(result.message);
+    }
+
+    onLogin(result.user);
+
+  } catch (error) {
+    setError(error.message);
+  }
+}
+
 
   return (
     <div>
@@ -85,11 +91,7 @@ function Login({ onLogin }) {
 
         <button type="submit">Login</button>
 
- <p>
-    <strong>Hints:</strong> libraryAdmin / Lib@2026
-    <br />
-    Student: Student / Stu@2026
-</p>
+
 
         {error && <p>{error}</p>}
       </form>

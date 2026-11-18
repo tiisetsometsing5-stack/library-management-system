@@ -11,135 +11,87 @@ function Transactions({
   const [quantity, setQuantity] = useState("");
   const [error, setError] = useState("");
 
-  function handleTransaction(event) {
-    event.preventDefault();
+  async function handleTransaction(event) {
+  event.preventDefault();
 
-    if (selectedBook === "") {
-      setError("Please select a book.");
-      return;
-    }
+  if (selectedBook === "") {
+    setError("Please select a book.");
+    return;
+  }
 
-    if (quantity === "") {
-      setError("Please enter a quantity.");
-      return;
-    }
+  if (quantity === "") {
+    setError("Please enter a quantity.");
+    return;
+  }
 
-    const amount = Number(quantity);
+  const amount = Number(quantity);
 
-    if (amount <= 0) {
-      setError("Quantity must be greater than 0.");
-      return;
-    }
+  if (amount <= 0) {
+    setError("Quantity must be greater than 0.");
+    return;
+  }
 
-    const book = books.find(
-      (book) => book.id === Number(selectedBook)
-    );
-
-    if (!book) {
-      setError("Book not found.");
-      return;
-    }
-
-    // Borrow Book
-    if (transactionType === "borrow") {
-      if (book.quantity < amount) {
-        setError("There are not enough copies available.");
-        return;
-      }
-
-      const updatedBooks = books.map((book) => {
-        if (book.id === Number(selectedBook)) {
-          return {
-            ...book,
-            quantity: book.quantity - amount,
-          };
-        }
-
-        return book;
-      });
-
-      setBooks(updatedBooks);
-
-      const newTransaction = {
-        id: Date.now(),
-        bookTitle: book.title,
-        type: "Borrowed",
-        quantity: amount,
-        date: new Date().toLocaleString(),
-        user: loggedInUser.username,
-      };
-
-      setTransactions([
-        ...transactions,
-        newTransaction,
-      ]);
-    }
-
-    // Return Book
-    if (transactionType === "return") {
-      const updatedBooks = books.map((book) => {
-        if (book.id === Number(selectedBook)) {
-          return {
-            ...book,
-            quantity: book.quantity + amount,
-          };
-        }
-
-        return book;
-      });
-
-      setBooks(updatedBooks);
-
-      const newTransaction = {
-        id: Date.now(),
-        bookTitle: book.title,
-        type: "Returned",
-        quantity: amount,
-        date: new Date().toLocaleString(),
-        user: loggedInUser.username,
-      };
-
-      setTransactions([
-        ...transactions,
-        newTransaction,
-      ]);
-    }
-
-    //add stock
-    // Add Stock
-if (transactionType === "addStock") {
-  const updatedBooks = books.map((book) => {
-    if (book.id === Number(selectedBook)) {
-      return {
-        ...book,
-        quantity: book.quantity + amount,
-      };
-    }
-
-    return book;
-  });
-
-  setBooks(updatedBooks);
-
-  const newTransaction = {
-    id: Date.now(),
-    bookTitle: book.title,
-    type: "Stock Added",
-    quantity: amount,
-    date: new Date().toLocaleString(),
+  const transactionTypes = {
+    borrow: "Borrowed",
+    return: "Returned",
+    addStock: "Stock Added",
   };
 
-  setTransactions([
-    ...transactions,
-    newTransaction,
-  ]);
-}
+  try {
+    const response = await fetch(
+      "http://localhost:5000/api/transactions",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          book_id: Number(selectedBook),
+          user_id: loggedInUser.id,
+          type: transactionTypes[transactionType],
+          quantity: amount,
+        }),
+      }
+    );
+
+    const result = await response.json();
+
+    if (!response.ok) {
+      throw new Error(result.message || "Transaction failed.");
+    }
+
+    // Refresh books from the database
+    const booksResponse = await fetch(
+      "http://localhost:5000/api/books"
+    );
+
+    const updatedBooks = await booksResponse.json();
+    setBooks(updatedBooks);
+
+    // Refresh transaction history from the database
+    const transactionsResponse = await fetch(
+      "http://localhost:5000/api/transactions"
+    );
+
+    const updatedTransactions = await transactionsResponse.json();
+
+    setTransactions(
+      updatedTransactions.map((transaction) => ({
+        ...transaction,
+        user: transaction.userName,
+        date: new Date(transaction.date).toLocaleString(),
+      }))
+    );
 
     setSelectedBook("");
     setTransactionType("borrow");
     setQuantity("");
     setError("");
+
+  } catch (error) {
+    setError(error.message);
   }
+}
 
   return (
     <>
@@ -223,10 +175,10 @@ if (transactionType === "addStock") {
             <tbody>
               {transactions
   .filter((transaction) =>
-    loggedInUser.role === "librarian"
-      ? true
-      : transaction.user === loggedInUser.username
-  )
+  loggedInUser.role === "Librarian/Admin"
+    ? true
+    : transaction.user === loggedInUser.name
+)
   .map((transaction) => (
                 <tr key={transaction.id}>
                   <td>{transaction.bookTitle}</td>

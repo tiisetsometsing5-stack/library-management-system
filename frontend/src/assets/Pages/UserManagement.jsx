@@ -4,51 +4,104 @@ function Users({ users, setUsers }) {
   const [name, setName] = useState("");
   const [membershipId, setMembershipId] = useState("");
   const [role, setRole] = useState("");
+  const [password, setPassword] = useState("");
 
   const [editingId, setEditingId] = useState(null);
   const [error, setError] = useState("");
 
-  function handleSubmit(event) {
-    event.preventDefault();
+  
+async function handleSubmit(event) {
+  event.preventDefault();
 
-    if (name === "" || membershipId === "" || role === "") {
-      setError("Please fill in all fields.");
-      return;
-    }
+  if (
+    name === "" ||
+    membershipId === "" ||
+    role === "" ||
+    (editingId === null && password === "")
+  ) {
+    setError("Please fill in all required fields.");
+    return;
+  }
 
+  const userData = {
+    name: name,
+    membership_id: membershipId,
+    role: role,
+  };
+
+  try {
     if (editingId !== null) {
+      const response = await fetch(
+        `http://localhost:5000/api/users/${editingId}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(userData),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to update user");
+      }
+
       setUsers(
         users.map((user) =>
           user.id === editingId
-            ? {
-                ...user,
-                name: name,
-                membershipId: membershipId,
-                role: role,
-              }
+            ? { ...user, name, membershipId, role }
             : user
         )
       );
 
       setEditingId(null);
-    } else {
-      const newUser = {
-        id: Date.now(),
-        name: name,
-        membershipId: membershipId,
-        role: role,
-      };
 
-      setUsers([...users, newUser]);
+    } else {
+      const response = await fetch(
+        "http://localhost:5000/api/users",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            ...userData,
+            password: password,
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        const result = await response.json();
+        throw new Error(result.message || "Failed to add user");
+      }
+
+      const result = await response.json();
+
+      setUsers([
+        ...users,
+        {
+          id: result.userId,
+          name: name,
+          membershipId: membershipId,
+          role: role,
+        },
+      ]);
     }
 
     clearForm();
+
+  } catch (error) {
+    setError(error.message);
   }
+}
+
 
   function clearForm() {
     setName("");
     setMembershipId("");
     setRole("");
+    setPassword("");
     setError("");
   }
 
@@ -60,9 +113,25 @@ function Users({ users, setUsers }) {
     setError("");
   }
 
-  function handleDelete(id) {
+  async function handleDelete(id) {
+  try {
+    const response = await fetch(
+      `http://localhost:5000/api/users/${id}`,
+      {
+        method: "DELETE",
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error("Failed to delete user");
+    }
+
     setUsers(users.filter((user) => user.id !== id));
+
+  } catch (error) {
+    setError(error.message);
   }
+}
 
   return (
     <div>
@@ -102,6 +171,19 @@ function Users({ users, setUsers }) {
         </div>
 
         <br />
+
+            <div>
+      <label>Password:</label>
+
+      <input
+        type="password"
+        value={password}
+        onChange={(event) => setPassword(event.target.value)}
+        placeholder="Enter password"
+      />
+    </div>
+
+    <br />
 
         <div>
           <label>User Role:</label>
